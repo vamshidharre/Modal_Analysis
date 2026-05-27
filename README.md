@@ -74,6 +74,25 @@ After training, single-point predictions can be made by providing any (X, Y, Z, 
 
 ---
 
+## 🔬 Validation & Limitations
+
+The bending mode shapes were checked against Euler-Bernoulli cantilever beam theory using only the normalized axial deformation profile. Modes 1, 2, 3, and 5 match the analytical cantilever shapes with correlation ≥ 0.99, which independently validates the FEM deformation export shape trends.
+
+| Comparison | corr | RMS (normalized) |
+|------------|------|------------------|
+| Mode 1 vs EB 1st-bending | +1.0000 | 0.0024 |
+| Mode 2 vs EB 1st-bending | +0.9999 | 0.0127 |
+| Mode 3 vs EB 2nd-bending | +0.9975 | 0.0320 |
+| Mode 5 vs EB 2nd-bending | +0.9899 | 0.0732 |
+
+![Mode shape validation](figures/mode_shapes_validation.png)
+
+The machine learning model is strong for in-distribution interpolation: a random 80/20 split gives R² ≈ 0.996. However, holding out an entire mode gives poor or negative R² for several modes, so the current model should be understood as a fast field surrogate over the six computed mode shapes, not a predictor of new unseen modes.
+
+Future validation would benefit from exporting directional displacement components (`Ux`, `Uy`, `Uz`) to decompose bending and torsion, plus natural frequencies in Hz to compare against `f_n = (β_nL)^2/(2π)·sqrt(EI/ρAL^4)`.
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
