@@ -110,16 +110,16 @@ Loading data for all modes...
  - Loaded Mode 5
  - Loaded Mode 6
 
-Total rows in dataset: 6474
+Total rows in dataset: 6462
 
 Training the Multi-Mode Machine Learning model...
 Training Complete!
-Mean Squared Error (MSE) on Test Data: 0.XXXXXXXX
-Accuracy (R-Squared Score): XX.XX%
+Mean Squared Error (MSE) on Test Data: 1.01613573
+Accuracy (R-Squared Score): 99.63%
 
 --- INFERENCE TEST ---
-Node at X=0.001, Y=0, Z=0.019 -> Predicted Mode 1 Deformation: X.XXXXXX m
-Node at X=0.001, Y=0, Z=0.019 -> Predicted Mode 2 Deformation: X.XXXXXX m
+Node at X=0.001, Y=0, Z=0.019 -> Predicted Mode 1 Deformation: 0.250999 m
+Node at X=0.001, Y=0, Z=0.019 -> Predicted Mode 2 Deformation: 0.496889 m
 ```
 
 ---

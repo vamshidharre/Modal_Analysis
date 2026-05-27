@@ -4,10 +4,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import os
+from pathlib import Path
 
 # =============== MACHINE LEARNING PIPELINE ===============
 
-data_dir = r"d:\Modal_Analysis\Model_Beam_Modal_Analysis"
+DATA_DIR = Path(__file__).resolve().parent   # data files sit beside this script
 
 # 1. Load all Modes and combine them into one large dataset
 all_data = []
@@ -15,7 +16,7 @@ all_data = []
 print("Loading data for all modes...")
 # Assuming you have modes 1 through 6
 for mode in range(1, 7):
-    file_path = os.path.join(data_dir, f"Mode{mode}.txt")
+    file_path = DATA_DIR / f"Mode{mode}.txt"
     if os.path.exists(file_path):
         # Read the file
         df = pd.read_csv(file_path, sep='\t')
