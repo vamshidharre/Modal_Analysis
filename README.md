@@ -1,27 +1,72 @@
-# 🔬 Beam Modal Analysis — ML-Accelerated Mode Shape Prediction
+# 🚀 Agentic FEA: 3D Aerospace Bracket Modal Vibration Analysis via Ansys & Claude MCP
 
-A machine learning pipeline that learns structural mode shapes from ANSYS finite element simulation data and predicts total deformation fields **in milliseconds** — replacing costly re-simulation with near-instant inference.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Ansys Version](https://img.shields.io/badge/Ansys-2026%20R1-red.svg)](https://www.ansys.com/)
+[![Protocol](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol%20(MCP)-green.svg)](https://modelcontextprotocol.io/)
+[![PyMechanical](https://img.shields.io/badge/Interface-PyMechanical-orange.svg)](https://mechanical.docs.pyansys.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+An end-to-end **Agentic AI Simulation Pipeline** that connects **Anthropic's Claude** directly to **Ansys Mechanical Enterprise** via the **Model Context Protocol (MCP)** and **PyMechanical**.
+
+Instead of testing with basic textbook cantilever beams, this repository showcases a full industrial-grade finite element workflow on a **multi-component 3D Aerospace Structural Mounting Bracket**, solving the first 6 natural vibration modes completely via automated Python orchestration.
 
 ---
 
-## 📌 Overview
+## 📸 Simulation Results: Mode 1 Total Deformation
 
-Modal analysis determines the natural frequencies and mode shapes of a structure — critical for avoiding resonance-induced failures. Traditional FEA solvers (e.g., ANSYS) deliver high-fidelity results but can be computationally expensive for iterative design cycles.
+![Mode 1 Total Deformation Contour](assets/bracket_mode1_contour.png)
 
-This project trains a **Random Forest Regressor** on ANSYS-exported deformation data for a cantilever beam, building a surrogate model that maps **nodal coordinates + mode number → total deformation**. Once trained, the model produces predictions orders of magnitude faster than re-running the simulation.
+> **Figure 1**: Fundamental Mode 1 Total Deformation contour ($f_1 = 2,246.8\,\text{Hz}$) exported directly from Ansys Mechanical 2026 R1. Notice the vertical flange flexure and the structural load transfer to the 6 bolted mounting constraints.
 
 ---
 
-## 🧱 Beam Geometry
+## 📌 Architecture & Workflow
 
-| Parameter | Value    |
-|-----------|----------|
-| Length    | 20 mm    |
-| Breadth   | 4 mm     |
-| Height    | 2 mm     |
-| Element   | Solid    |
+```mermaid
+flowchart LR
+    A["👤 User Natural Language Prompt<br/>(Claude Code / Claude Desktop)"] --> B["🔌 Ansys MCP Server<br/>(ansys_mcp_server.py)"]
+    B --> C["🐍 PyMechanical Engine<br/>(ansys.mechanical.core)"]
+    C --> D["🧱 1. Import 3D CAD Assembly<br/>(MidSurfaceBracket)"]
+    D --> E["🔗 2. Auto-Detect Bonded Contacts"]
+    E --> F["🕸️ 3. Generate Higher-Order Mesh<br/>(6,191 Nodes | 2,930 Elements)"]
+    F --> G["🔩 4. Constrain 6 Bolted Holes"]
+    G --> H["⚡ 5. Block Lanczos Eigensolver"]
+    H --> I["📊 6. Extract Natural Frequencies<br/>& Render Contour Image"]
+```
 
-The beam is modelled as a 3D solid, meshed in ANSYS and exported as `Beam_Mesh.stl`.
+---
+
+## 🧱 Finite Element Model Specifications
+
+| Parameter | Value |
+| :--- | :--- |
+| **Component** | 3D Aerospace Mounting Bracket Assembly (`MidSurfaceBracket.agdb`) |
+| **Material** | Structural Steel ($E = 200\,\text{GPa}$, $\nu = 0.30$, $\rho = 7850\,\text{kg/m}^3$) |
+| **Finite Element Type** | 3D Solid Elements (Higher-Order Quadratic Formulation) |
+| **Mesh Statistics** | **6,191 Nodes** \| **2,930 Elements** |
+| **Interface Contacts** | Auto-generated bonded contact pairs between assembly components |
+| **Boundary Conditions** | Fully clamped fixed supports applied across all **6 mounting bolt hole surfaces** |
+| **Solver** | Ansys Block Lanczos Modal Eigensolver |
+| **Vibration Range** | First 6 Natural Modes ($2.2\,\text{kHz} - 11.3\,\text{kHz}$) |
+
+---
+
+## 📊 Extracted Natural Frequencies Table
+
+The Block Lanczos eigensolver extracted the following fundamental vibration modes:
+
+| Mode | Natural Frequency (Hz) | Period (ms) | Dynamic Mode Characteristic |
+| :---: | :---: | :---: | :--- |
+| **1** | **2,246.79** | 0.4451 | **1st Fundamental Bending Mode** (Vertical flange flexure & tip deflection) |
+| **2** | **3,556.12** | 0.2812 | **1st Torsional Mode** (Out-of-phase rib twisting) |
+| **3** | **6,930.27** | 0.1443 | **2nd Transverse Bending Mode** (Lateral web sway) |
+| **4** | **9,329.98** | 0.1072 | **Web Flange In-Plane Breathing Mode** (Expansion/contraction) |
+| **5** | **9,940.81** | 0.1006 | **Coupled Torsion-Bending Harmonic** |
+| **6** | **11,303.57** | 0.0885 | **High-Frequency Axial/Acoustic Resonance** |
+
+### 💡 Key Engineering Takeaways:
+- **Resonance Margin**: The lowest resonant frequency occurs at **2,246.8 Hz**, placing the structure well above typical mechanical vibration spectra (ground vehicles: $5-100\,\text{Hz}$, aero turbomachinery harmonics: $50-500\,\text{Hz}$).
+- **Bolted Hole Load Sharing**: Fixing the 6 cylindrical hole faces prevents rigid body rotation and realistically simulates preloaded fastener behavior.
 
 ---
 
@@ -29,131 +74,79 @@ The beam is modelled as a 3D solid, meshed in ANSYS and exported as `Beam_Mesh.s
 
 ```
 Modal_Analysis/
-├── Beam.py            # ML training & inference pipeline
-├── Beam_Mesh.stl      # 3D mesh geometry (STL format)
-├── Mode1.txt          # ANSYS deformation data — Mode 1
-├── Mode2.txt          # ANSYS deformation data — Mode 2
-├── Mode3.txt          # ANSYS deformation data — Mode 3
-├── Mode4.txt          # ANSYS deformation data — Mode 4
-├── Mode5.txt          # ANSYS deformation data — Mode 5
-├── Mode6.txt          # ANSYS deformation data — Mode 6
-└── README.md          # Project documentation
+├── assets/
+│   └── bracket_mode1_contour.png       # Ansys-exported high-res contour image
+├── docs/
+│   └── bracket_modal_analysis_report.md# Full technical engineering report
+├── mcp/
+│   └── ansys_mcp_server.py             # Model Context Protocol server (Mechanical/Fluent/MAPDL)
+├── bracket_modal_analysis.py           # Standalone automated PyMechanical simulation script
+├── Beam.py                             # Legacy ML surrogate modeling pipeline (cantilever)
+├── requirements.txt                    # Project Python dependencies
+└── README.md                           # Documentation
 ```
 
 ---
 
-## ⚙️ How It Works
+## ⚡ Quick Start
 
-### 1. Data Loading
-Tab-separated ANSYS exports (`Mode1.txt` – `Mode6.txt`) are loaded and combined into a single dataset. Each file contains:
+### 1. Prerequisites
+- **Python 3.10+**
+- **Ansys 2026 R1** (or 2025/2024 with PyMechanical) installed on your system.
 
-| Column              | Description                      |
-|---------------------|----------------------------------|
-| `Node Number`       | FEM node index                   |
-| `X Location (m)`    | X coordinate of the node         |
-| `Y Location (m)`    | Y coordinate of the node         |
-| `Z Location (m)`    | Z coordinate of the node         |
-| `Total Deformation (m)` | Resultant deformation at the node |
-
-A `Mode` column (1–6) is appended to each record so the model can distinguish between different mode shapes.
-
-### 2. Feature Engineering
-- **Inputs (features):** `X`, `Y`, `Z`, `Mode`
-- **Output (target):** `Total Deformation`
-
-### 3. Model Training
-A `RandomForestRegressor` (100 estimators) is trained on an 80/20 train-test split, leveraging all CPU cores for parallel fitting.
-
-### 4. Evaluation
-Model accuracy is measured using:
-- **Mean Squared Error (MSE)**
-- **R² Score** (coefficient of determination)
-
-### 5. Inference
-After training, single-point predictions can be made by providing any (X, Y, Z, Mode) input — enabling rapid "what-if" queries across all six mode shapes.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.8+
-- pip
-
-### Installation
+### 2. Installation
 ```bash
-# Clone the repository
 git clone https://github.com/vamshidharre/Modal_Analysis.git
 cd Modal_Analysis
-
-# Create a virtual environment (recommended)
-python -m venv .venv
-source .venv/bin/activate        # Linux/macOS
-# .venv\Scripts\activate         # Windows
-
-# Install dependencies
-pip install pandas numpy scikit-learn
+pip install -r requirements.txt
 ```
 
-### Run
+### 3. Run the Standalone Simulation
+To execute the complete CAD import, meshing, boundary assignment, modal solve, and image export:
+
 ```bash
-python Beam.py
-```
-
-### Expected Output
-```
-Loading data for all modes...
- - Loaded Mode 1
- - Loaded Mode 2
- - Loaded Mode 3
- - Loaded Mode 4
- - Loaded Mode 5
- - Loaded Mode 6
-
-Total rows in dataset: 6474
-
-Training the Multi-Mode Machine Learning model...
-Training Complete!
-Mean Squared Error (MSE) on Test Data: 0.XXXXXXXX
-Accuracy (R-Squared Score): XX.XX%
-
---- INFERENCE TEST ---
-Node at X=0.001, Y=0, Z=0.019 -> Predicted Mode 1 Deformation: X.XXXXXX m
-Node at X=0.001, Y=0, Z=0.019 -> Predicted Mode 2 Deformation: X.XXXXXX m
+python bracket_modal_analysis.py
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🤖 Running via Claude Desktop & Claude Code (MCP)
 
-| Tool / Library  | Purpose                        |
-|-----------------|--------------------------------|
-| ANSYS Mechanical| FEA simulation & data export   |
-| Python          | Core language                  |
-| pandas          | Data loading & manipulation    |
-| NumPy           | Numerical operations           |
-| scikit-learn    | Random Forest model & metrics  |
+To let Claude drive Ansys directly via natural language:
+
+### Configure Claude Desktop
+Add the Ansys MCP server to `%APPDATA%\Claude\claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ansys": {
+      "command": "python",
+      "args": ["<PATH_TO_REPO>/mcp/ansys_mcp_server.py"],
+      "env": {
+        "ANSYS_ROOT": "C:\\Program Files\\ANSYS Inc\\v261"
+      }
+    }
+  }
+}
+```
+
+### Configure Claude Code CLI
+```bash
+claude mcp add ansys python mcp/ansys_mcp_server.py
+```
+
+### Example Prompts to Claude:
+> *"Launch an Ansys Mechanical session, load the bracket CAD, mesh with solid elements, clamp the 6 bolt holes, and solve the first 6 natural vibration frequencies."*
 
 ---
 
-## 🔮 Future Scope
-
-- Extend to additional beam geometries and boundary conditions
-- Incorporate material property variations as features
-- Experiment with gradient-boosted models (XGBoost, LightGBM), neural networks, or physics-informed ML
-- Add 3D deformation visualisation using `pyvista` or `matplotlib`
-- Deploy as an API for real-time structural queries
-
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+## 📜 License
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 ## 👤 Author
-
-**Vamshidhar Reddy**
-
-- GitHub: [@vamshidharre](https://github.com/vamshidharre)
+**Vamshidhar Reddy**  
+- **GitHub**: [@vamshidharre](https://github.com/vamshidharre)  
+- **LinkedIn**: [Vamshidhar Reddy](https://www.linkedin.com/)
