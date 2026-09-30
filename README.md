@@ -4,11 +4,11 @@
 [![Ansys Version](https://img.shields.io/badge/Ansys-2026%20R1-red.svg)](https://www.ansys.com/)
 [![Protocol](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol%20(MCP)-green.svg)](https://modelcontextprotocol.io/)
 [![PyMechanical](https://img.shields.io/badge/Interface-PyMechanical-orange.svg)](https://mechanical.docs.pyansys.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An end-to-end **Agentic AI Simulation Pipeline** that connects **Anthropic's Claude** directly to **Ansys Mechanical Enterprise** via the **Model Context Protocol (MCP)** and **PyMechanical**.
 
-Instead of testing with basic textbook cantilever beams, this repository showcases a full industrial-grade finite element workflow on a **multi-component 3D Aerospace Structural Mounting Bracket**, solving the first 6 natural vibration modes completely via automated Python orchestration.
+Instead of testing with basic textbook cantilever beams, this repository showcases a full industrial-grade finite element workflow on a **multi-component 3D Aerospace Structural Mounting Bracket**, extracting the first 6 natural vibration modes completely via automated Python orchestration.
 
 ---
 
@@ -24,7 +24,7 @@ Instead of testing with basic textbook cantilever beams, this repository showcas
 
 ```mermaid
 flowchart LR
-    A["👤 User Natural Language Prompt<br/>(Claude Code / Claude Desktop)"] --> B["🔌 Ansys MCP Server<br/>(ansys_mcp_server.py)"]
+    A["👤 User Natural Language Prompt<br/>(Claude Code / Claude Desktop)"] --> B["🔌 Ansys MCP Server<br/>(mcp/ansys_mcp_server.py)"]
     B --> C["🐍 PyMechanical Engine<br/>(ansys.mechanical.core)"]
     C --> D["🧱 1. Import 3D CAD Assembly<br/>(MidSurfaceBracket)"]
     D --> E["🔗 2. Auto-Detect Bonded Contacts"]
@@ -70,20 +70,25 @@ The Block Lanczos eigensolver extracted the following fundamental vibration mode
 
 ---
 
-## 🗂️ Repository Structure
+## 🗂️ Clean Repository Structure
 
 ```
 Modal_Analysis/
 ├── assets/
-│   └── bracket_mode1_contour.png       # Ansys-exported high-res contour image
+│   └── bracket_mode1_contour.png          # High-resolution simulation contour
 ├── docs/
-│   └── bracket_modal_analysis_report.md# Full technical engineering report
+│   └── bracket_modal_analysis_report.md   # Comprehensive engineering report
 ├── mcp/
-│   └── ansys_mcp_server.py             # Model Context Protocol server (Mechanical/Fluent/MAPDL)
-├── bracket_modal_analysis.py           # Standalone automated PyMechanical simulation script
-├── Beam.py                             # Legacy ML surrogate modeling pipeline (cantilever)
-├── requirements.txt                    # Project Python dependencies
-└── README.md                           # Documentation
+│   └── ansys_mcp_server.py                # Model Context Protocol server (Mechanical/Fluent/MAPDL)
+├── models/
+│   └── Aerospace_Bracket_Modal.mechdb     # Ready-to-open Ansys Mechanical database
+├── examples/
+│   └── cantilever_ml_surrogate/           # Benchmark: Random Forest ML surrogate on beam FEA
+├── bracket_modal_analysis.py              # Main automated simulation script
+├── requirements.txt                       # Clean Python dependencies
+├── .gitignore                             # Ignore cache, logs, and Ansys scratch files
+├── LICENSE                                # MIT License
+└── README.md                              # Repository documentation
 ```
 
 ---
@@ -92,7 +97,7 @@ Modal_Analysis/
 
 ### 1. Prerequisites
 - **Python 3.10+**
-- **Ansys 2026 R1** (or 2025/2024 with PyMechanical) installed on your system.
+- **Ansys 2026 R1** (or 2025/2024 with PyMechanical) installed.
 
 ### 2. Installation
 ```bash
@@ -102,11 +107,19 @@ pip install -r requirements.txt
 ```
 
 ### 3. Run the Standalone Simulation
-To execute the complete CAD import, meshing, boundary assignment, modal solve, and image export:
+To execute the complete CAD import, meshing, contact generation, modal solve, and image export:
 
 ```bash
 python bracket_modal_analysis.py
 ```
+
+### 4. Open Directly in Ansys Mechanical
+To inspect the 3D model, mesh, and animate the mode shapes in Ansys GUI, open the included database file:
+
+```powershell
+& "C:\Program Files\ANSYS Inc\v261\aisol\bin\winx64\AnsysWBU.exe" -file "models/Aerospace_Bracket_Modal.mechdb"
+```
+*(Or double-click `models/Aerospace_Bracket_Modal.mechdb`)*
 
 ---
 
@@ -136,7 +149,7 @@ Add the Ansys MCP server to `%APPDATA%\Claude\claude_desktop_config.json`:
 claude mcp add ansys python mcp/ansys_mcp_server.py
 ```
 
-### Example Prompts to Claude:
+### Example Prompt to Claude:
 > *"Launch an Ansys Mechanical session, load the bracket CAD, mesh with solid elements, clamp the 6 bolt holes, and solve the first 6 natural vibration frequencies."*
 
 ---

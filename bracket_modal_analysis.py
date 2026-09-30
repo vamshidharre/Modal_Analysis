@@ -95,13 +95,25 @@ def run_bracket_modal():
 
         # Export contour plot for Mode 1
         deformations[0].Activate()
-        out_image = Path.cwd() / "bracket_mode1_contour.png"
+        assets_dir = Path.cwd() / "assets"
+        assets_dir.mkdir(exist_ok=True)
+        out_image = assets_dir / "bracket_mode1_contour.png"
         try:
             ExtAPI.Graphics.Camera.SetFit()
             ExtAPI.Graphics.ExportImage(str(out_image))
             print(f"\n[OK] High-resolution mode shape contour saved: {out_image.name}")
         except Exception as e:
             print(f"[NOTE] Image export: {e}")
+
+        # Save native Ansys Mechanical database (.mechdb)
+        models_dir = Path.cwd() / "models"
+        models_dir.mkdir(exist_ok=True)
+        save_db = models_dir / "Aerospace_Bracket_Modal.mechdb"
+        try:
+            app.save_as(str(save_db), overwrite=True)
+            print(f"[OK] Native Ansys database saved: {save_db.name}")
+        except Exception as e:
+            print(f"[NOTE] Database save: {e}")
 
         return results_data
 
