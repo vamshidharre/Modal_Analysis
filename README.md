@@ -162,4 +162,6 @@ This project is licensed under the [MIT License](LICENSE).
 ## 👤 Author
 **Vamshidhar Reddy**  
 - **GitHub**: [@vamshidharre](https://github.com/vamshidharre)  
-- **LinkedIn**: [Vamshidhar Reddy](https://www.linkedin.com/)
+- **LinkedIn**: [Vamshidhar Reddy](https://www.linkedin.com/in/vamshidhar-reddy-eng/)  
+- **Portfolio**: [vamshidhar-portfolio.netlify.app](https://vamshidhar-portfolio.netlify.app/)
+
